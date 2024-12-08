@@ -50,6 +50,7 @@ const commentRender = (comments) => {
     fragment.append(comment);
   }
 
+
   commentList.innerHTML = '';
   commentList.append(fragment);
   commentShownCountElement.textContent = commentsShown;
