@@ -1,4 +1,5 @@
 import { getPictures } from './data.js';
+import {showBigPicture} from './big-picture.js';
 
 const list = document.querySelector('.pictures');
 
@@ -13,7 +14,15 @@ pictures.forEach((picture) => {
   element.children[0].alt = picture.descriptions;
   element.querySelector('.picture__comments').textContent = picture.comments.length;
   element.querySelector('.picture__likes').textContent = picture.likes;
+
+  element.addEventListener('click', () => {
+    showBigPicture(picture);
+  });
+
   fragment.appendChild(element);
+
 });
 
 list.appendChild(fragment);
+
+export {pictures};
