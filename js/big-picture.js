@@ -10,7 +10,6 @@ let commentsShown = 0;
 const COMMENTS_NUMBER = 5;
 const commentArray = [];
 
-
 const pictureRender = (picture) => {
   bigPicture.querySelector('img').src = picture.url;
   bigPicture.querySelector('img').alt = picture.descriptions;
