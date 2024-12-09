@@ -4,8 +4,11 @@ const body = document.body;
 const commentElement = document.querySelector('.social__comment');
 const commentList = document.querySelector('.social__comments');
 const commentLoader = document.querySelector('.comments-loader');
-const commentCount = document.querySelector('.social__comment-count');
-
+const commentCount = document.querySelector('.comments-count');
+const commentShownCountElement = bigPicture.querySelector('.comments-shown-count');
+let commentsShown = 0;
+const COMMENTS_NUMBER = 5;
+const commentArray = [];
 
 const pictureRender = (picture) => {
   bigPicture.querySelector('img').src = picture.url;
@@ -25,30 +28,44 @@ const commentCreator = (picture) => {
 };
 
 const commentRender = (comments) => {
-  commentList.innerHTML = '';
+  if (comments) {
+    comments.forEach((item) => {
+      commentArray.push(item);
+    });
+  }
+
+  commentsShown += COMMENTS_NUMBER;
+
+  if (commentsShown >= commentArray.length) {
+    commentLoader.classList.add('hidden');
+    commentsShown = commentArray.length;
+  } else {
+    commentLoader.classList.remove('hidden');
+  }
 
   const fragment = document.createDocumentFragment();
-  comments.forEach((item) => {
-    const comment = commentCreator(item);
+  for (let i = 0; i < commentsShown; i++) {
+    const comment = commentCreator(commentArray[i]);
     fragment.append(comment);
-  });
+  }
 
+  commentList.innerHTML = '';
   commentList.append(fragment);
+  commentShownCountElement.textContent = commentsShown;
+  commentCount.textContent = commentArray.length;
 };
 
 const closeBigPicture = () => {
   bigPicture.classList.add('hidden');
   body.classList.remove('modal-open');
-  commentLoader.classList.remove('hidden');
-  commentCount.classList.remove('hidden');
   document.removeEventListener('keydown', closeOnKey);
+  commentsShown = 0;
+  commentArray.length = 0;
 };
 
 const openBigPicture = () => {
   bigPicture.classList.remove('hidden');
   body.classList.add('modal-open');
-  commentLoader.classList.add('hidden');
-  commentCount.classList.add('hidden');
   document.addEventListener('keydown', closeOnKey);
 };
 
@@ -57,6 +74,8 @@ function closeOnKey(evt) {
     evt.preventDefault();
     bigPicture.classList.add('hidden');
     body.classList.remove('modal-open');
+    commentsShown = 0;
+    commentArray.length = 0;
   }
 }
 
@@ -68,6 +87,9 @@ const showBigPicture = (picture) => {
 };
 
 cancelBigPicture.addEventListener('click', closeBigPicture);
+commentLoader.addEventListener('click', () => {
+  commentRender();
+});
 
 
 export {showBigPicture};
