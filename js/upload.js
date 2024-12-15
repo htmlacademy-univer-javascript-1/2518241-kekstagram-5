@@ -1,3 +1,5 @@
+import {init, reset} from './effects.js';
+
 const uploadForm = document.querySelector('.img-upload__form');
 const uploadPicture = document.querySelector('.img-upload__overlay');
 const uploadButton = document.querySelector('.img-upload__input');
@@ -8,6 +10,10 @@ const hashtagsField = document.querySelector('.text__hashtags');
 const HASHTAG = /^#[a-zа-яё0-9]{1,19}$/i;
 const MAX_HASHTAG_COUNT = 5;
 const MAX_COMMENT_LENGTH = 140;
+const minusScaleButton = document.querySelector('.scale__control--smaller');
+const plusScaleButton = document.querySelector('.scale__control--bigger');
+const imageScaleValue = document.querySelector('.scale__control--value');
+const imageScaleField = document.querySelector('.img-upload__preview');
 
 
 const pristine = new Pristine(uploadForm, {
@@ -68,6 +74,25 @@ uploadForm.addEventListener('submit', (evt) => {
 });
 
 
+const upscaleImageField = () => {
+  let imageScaleValueInt = Number(imageScaleValue.value.replace('%',''));
+  if (imageScaleValueInt < 100) {
+    imageScaleValueInt += 25;
+    imageScaleValue.value = `${imageScaleValueInt}%`;
+    imageScaleField.style.cssText = `transform: scale(${imageScaleValueInt / 100});`;
+  }
+};
+
+const downscaleImageField = () => {
+  let imageScaleValueInt = Number(imageScaleValue.value.replace('%',''));
+  if (imageScaleValueInt > 25) {
+    imageScaleValueInt -= 25;
+    imageScaleValue.value = `${imageScaleValueInt}%`;
+    imageScaleField.style.cssText = `transform: scale(${imageScaleValueInt / 100});`;
+  }
+};
+
+
 const closeUploadPicture = () => {
   uploadPicture.classList.add('hidden');
   body.classList.remove('modal-open');
@@ -75,6 +100,8 @@ const closeUploadPicture = () => {
   uploadButton.value = '';
   descriptionField.value = '';
   hashtagsField.value = '';
+  imageScaleField.style.cssText = 'transform: scale(1);';
+  reset();
 };
 
 const openUploadPicture = () => {
@@ -92,11 +119,15 @@ function closeOnKey(evt) {
     uploadButton.value = '';
     descriptionField.value = '';
     hashtagsField.value = '';
+    imageScaleField.style.cssText = 'transform: scale(1);';
+    reset();
   }
 }
 
 uploadButton.addEventListener('change', openUploadPicture);
 closeUploadButton.addEventListener('click', closeUploadPicture);
+plusScaleButton.addEventListener('click', upscaleImageField);
+minusScaleButton.addEventListener('click', downscaleImageField);
 
 hashtagsField.addEventListener('focus', () => {
   document.removeEventListener('keydown', closeOnKey);
@@ -111,3 +142,5 @@ descriptionField.addEventListener('focus', () => {
 descriptionField.addEventListener('blur', () => {
   document.addEventListener('keydown', closeOnKey);
 });
+
+init();
