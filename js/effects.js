@@ -63,6 +63,7 @@ const effectToSliderOptions = {
   }
 };
 
+
 const modalElement = document.querySelector('.img-upload');
 const imageElement = modalElement.querySelector('.img-upload__preview img');
 const sliderElement = modalElement.querySelector('.effect-level__slider');

@@ -1,5 +1,6 @@
 import {init, reset} from './effects.js';
 
+
 const uploadForm = document.querySelector('.img-upload__form');
 const uploadPicture = document.querySelector('.img-upload__overlay');
 const uploadButton = document.querySelector('.img-upload__input');
