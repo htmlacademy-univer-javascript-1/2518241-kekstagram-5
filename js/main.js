@@ -1,3 +1,10 @@
-import { getPictures } from './data.js';
+import { renderPictures } from './picture.js';
+import { getData } from './api.js';
+import { setUserPicterFrom } from './upload.js';
+import { closeUploadPicture } from './upload.js';
 
-getPictures();
+getData((pictures) => {
+  renderPictures(pictures);
+});
+
+setUserPicterFrom(closeUploadPicture);

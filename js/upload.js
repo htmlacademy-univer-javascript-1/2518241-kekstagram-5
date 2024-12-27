@@ -1,4 +1,6 @@
+/* eslint-disable */
 import {init, reset} from './effects.js';
+import { setData } from './api.js';
 
 const uploadForm = document.querySelector('.img-upload__form');
 const uploadPicture = document.querySelector('.img-upload__overlay');
@@ -14,6 +16,8 @@ const minusScaleButton = document.querySelector('.scale__control--smaller');
 const plusScaleButton = document.querySelector('.scale__control--bigger');
 const imageScaleValue = document.querySelector('.scale__control--value');
 const imageScaleField = document.querySelector('.img-upload__preview');
+const pictureForm = document.querySelector('.img-upload__form');
+const submitButton = document.querySelector('.img-upload__submit');
 
 
 const pristine = new Pristine(uploadForm, {
@@ -143,4 +147,109 @@ descriptionField.addEventListener('blur', () => {
   document.addEventListener('keydown', closeOnKey);
 });
 
+
+const blockSubmit = () => {
+  submitButton.disable = true;
+  submitButton.textContent = 'Опубликовываю...';
+};
+
+const unblockSubmit = () => {
+  submitButton.disable = false;
+  submitButton.textContent = 'Опубликовать';
+};
+
+const showSuccessSection = () => {
+  const successMessageContent = document.getElementById('success').content.querySelector('.success');
+  const successMessage = successMessageContent.cloneNode(true);
+
+  const removeSuccessSection = (evt) => {
+    if (evt.key === 'Escape') {
+      body.removeChild(successMessage);
+      document.removeEventListener('keydown', removeSuccessSection)
+    }
+  }
+
+  successMessage.addEventListener('click', (evt) => {
+    if (evt.target === successMessage) {
+      body.removeChild(successMessage);
+      document.removeEventListener('keydown', removeSuccessSection)
+    }
+  });
+
+  document.addEventListener('keydown', removeSuccessSection);
+
+  body.appendChild(successMessage);
+};
+
+const showFailSection = () => {
+  const errorMessageContent = document.getElementById('error').content.querySelector('.error');
+  const errorMessage = errorMessageContent.cloneNode(true);
+  const errorButton = errorMessage.querySelector('.error__button');
+  document.removeEventListener('keydown', closeOnKey);
+
+  errorButton.addEventListener('click', () => {
+    body.removeChild(errorMessage);
+    document.removeEventListener('keydown', removeErrorSection);
+    document.addEventListener('keydown', closeOnKey);
+    descriptionField.value = '';
+    hashtagsField.value = '';
+    imageScaleField.style.cssText = 'transform: scale(1);';
+    reset();
+  });
+
+  const removeErrorSection = (evt) => {
+    if (evt.key === 'Escape') {
+      body.removeChild(errorMessage);
+      document.removeEventListener('keydown', removeErrorSection);
+      document.addEventListener('keydown', closeOnKey);
+      descriptionField.value = '';
+      hashtagsField.value = '';
+      imageScaleField.style.cssText = 'transform: scale(1);';
+      reset();
+    }
+  }
+
+  errorMessage.addEventListener('click', (evt) => {
+    if (evt.target === errorMessage) {
+      body.removeChild(errorMessage);
+      document.removeEventListener('keydown', removeErrorSection);
+      document.addEventListener('keydown', closeOnKey);
+      descriptionField.value = '';
+      hashtagsField.value = '';
+      imageScaleField.style.cssText = 'transform: scale(1);';
+      reset();
+    }
+  });
+
+  document.addEventListener('keydown', removeErrorSection);
+
+  body.appendChild(errorMessage);
+};
+
+const setUserPicterFrom = (onSuccess) => {
+  pictureForm.addEventListener('submit', (evt) => {
+    evt.preventDefault();
+
+    const isValid = pristine.validate();
+    if (isValid) {
+      blockSubmit();
+      setData(
+        () => {
+          unblockSubmit();
+          onSuccess();
+          showSuccessSection();
+        },
+        () => {
+          unblockSubmit();
+          showFailSection();
+        },
+        new FormData(evt.target),
+      );
+    }
+  });
+};
+
+
 init();
+
+export {pristine, closeUploadPicture, setUserPicterFrom};
