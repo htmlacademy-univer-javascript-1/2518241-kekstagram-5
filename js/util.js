@@ -33,3 +33,29 @@ export const showAlert = (message) => {
 
   document.body.append(alertContainer);
 };
+
+export const getRandomNoRepeatElement = (array) => {
+  for (let i = 0 ; (i < array.length); i++) {
+    const r = Math.floor(Math.random() * (array.length - i)) + i;
+    const element = array[r];
+    array[r] = array[i];
+    array[i] = element;
+  }
+
+  return array;
+};
+
+export const getDecreasedArray = (pictureA, pictureB) => {
+  const lengthA = pictureA.comments.length;
+  const lengthB = pictureB.comments.length;
+
+  return lengthB - lengthA;
+};
+
+export const debounce = (callback, timeoutDelay) => {
+  let timeoutId;
+  return (...rest) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => callback.apply(this, rest), timeoutDelay);
+  };
+};
