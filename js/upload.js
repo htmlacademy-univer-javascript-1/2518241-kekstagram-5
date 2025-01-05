@@ -1,4 +1,3 @@
-/* eslint-disable */
 import {init, reset} from './effects.js';
 import { setData } from './api.js';
 
@@ -15,9 +14,11 @@ const MAX_COMMENT_LENGTH = 140;
 const minusScaleButton = document.querySelector('.scale__control--smaller');
 const plusScaleButton = document.querySelector('.scale__control--bigger');
 const imageScaleValue = document.querySelector('.scale__control--value');
-const imageScaleField = document.querySelector('.img-upload__preview');
+const imageScaleField = document.querySelector('.img-upload__preview img');
 const pictureForm = document.querySelector('.img-upload__form');
 const submitButton = document.querySelector('.img-upload__submit');
+
+/* eslint-disable */
 
 
 const pristine = new Pristine(uploadForm, {
@@ -40,7 +41,7 @@ pristine.addValidator(
 function validateHashtagItems(value) {
   const hashtags = splitHashtags(value);
   const isValidCount = hashtags.length <= MAX_HASHTAG_COUNT;
-  const isValidText = hashtags.every((hashtag) => HASHTAG.test(hashtag));
+  const isValidText = (hashtagsField.value === "") || hashtags.every((hashtag) => HASHTAG.test(hashtag));
   const isUnique = hashtags.length === new Set(hashtags.map((hashtag) => hashtag.toLowerCase())).size;
 
   return {isValidCount, isValidText, isUnique};
@@ -78,7 +79,7 @@ uploadForm.addEventListener('submit', (evt) => {
 });
 
 
-const upscaleImageField = () => {
+const increaseImageScale = () => {
   let imageScaleValueInt = Number(imageScaleValue.value.replace('%',''));
   if (imageScaleValueInt < 100) {
     imageScaleValueInt += 25;
@@ -87,7 +88,7 @@ const upscaleImageField = () => {
   }
 };
 
-const downscaleImageField = () => {
+const decreaseImageScale = () => {
   let imageScaleValueInt = Number(imageScaleValue.value.replace('%',''));
   if (imageScaleValueInt > 25) {
     imageScaleValueInt -= 25;
@@ -116,22 +117,14 @@ const openUploadPicture = () => {
 
 function closeOnKey(evt) {
   if (evt.key === 'Escape') {
-    evt.preventDefault();
-    uploadPicture.classList.add('hidden');
-    body.classList.remove('modal-open');
-    document.removeEventListener('keydown', closeOnKey);
-    uploadButton.value = '';
-    descriptionField.value = '';
-    hashtagsField.value = '';
-    imageScaleField.style.cssText = 'transform: scale(1);';
-    reset();
+    closeUploadPicture();
   }
 }
 
 uploadButton.addEventListener('change', openUploadPicture);
 closeUploadButton.addEventListener('click', closeUploadPicture);
-plusScaleButton.addEventListener('click', upscaleImageField);
-minusScaleButton.addEventListener('click', downscaleImageField);
+plusScaleButton.addEventListener('click', increaseImageScale);
+minusScaleButton.addEventListener('click', decreaseImageScale);
 
 hashtagsField.addEventListener('focus', () => {
   document.removeEventListener('keydown', closeOnKey);
@@ -161,24 +154,47 @@ const unblockSubmit = () => {
 const showSuccessSection = () => {
   const successMessageContent = document.getElementById('success').content.querySelector('.success');
   const successMessage = successMessageContent.cloneNode(true);
+  const successButton = successMessage.querySelector('.success__button');
+  const defaultEffect = document.getElementById('effect-none');
+  const handlerClosingSuccessSection = () => {
+    body.removeChild(successMessage);
+    document.removeEventListener('keydown', removeSuccessSection);
+    defaultEffect.checked = true;
+  }
 
   const removeSuccessSection = (evt) => {
     if (evt.key === 'Escape') {
-      body.removeChild(successMessage);
-      document.removeEventListener('keydown', removeSuccessSection)
+      handlerClosingSuccessSection();
     }
-  }
+  };
 
   successMessage.addEventListener('click', (evt) => {
     if (evt.target === successMessage) {
-      body.removeChild(successMessage);
-      document.removeEventListener('keydown', removeSuccessSection)
+      handlerClosingSuccessSection();
     }
   });
+
+  successButton.addEventListener('click', handlerClosingSuccessSection);
 
   document.addEventListener('keydown', removeSuccessSection);
 
   body.appendChild(successMessage);
+};
+
+const removeErrorSection = () => {
+  body.removeChild(body.lastChild);
+  document.removeEventListener('keydown', removeErrorSectionOnKeydown);
+  document.addEventListener('keydown', closeOnKey);
+  descriptionField.value = '';
+  hashtagsField.value = '';
+  imageScaleField.style.cssText = 'transform: scale(1);';
+  reset();
+};
+
+const removeErrorSectionOnKeydown = (evt) => {
+  if (evt.key === 'Escape') {
+    removeErrorSection();
+  }
 };
 
 const showFailSection = () => {
@@ -187,41 +203,15 @@ const showFailSection = () => {
   const errorButton = errorMessage.querySelector('.error__button');
   document.removeEventListener('keydown', closeOnKey);
 
-  errorButton.addEventListener('click', () => {
-    body.removeChild(errorMessage);
-    document.removeEventListener('keydown', removeErrorSection);
-    document.addEventListener('keydown', closeOnKey);
-    descriptionField.value = '';
-    hashtagsField.value = '';
-    imageScaleField.style.cssText = 'transform: scale(1);';
-    reset();
-  });
-
-  const removeErrorSection = (evt) => {
-    if (evt.key === 'Escape') {
-      body.removeChild(errorMessage);
-      document.removeEventListener('keydown', removeErrorSection);
-      document.addEventListener('keydown', closeOnKey);
-      descriptionField.value = '';
-      hashtagsField.value = '';
-      imageScaleField.style.cssText = 'transform: scale(1);';
-      reset();
-    }
-  }
+  errorButton.addEventListener('click', removeErrorSection);
 
   errorMessage.addEventListener('click', (evt) => {
     if (evt.target === errorMessage) {
-      body.removeChild(errorMessage);
-      document.removeEventListener('keydown', removeErrorSection);
-      document.addEventListener('keydown', closeOnKey);
-      descriptionField.value = '';
-      hashtagsField.value = '';
-      imageScaleField.style.cssText = 'transform: scale(1);';
-      reset();
+      removeErrorSection();
     }
   });
 
-  document.addEventListener('keydown', removeErrorSection);
+  document.addEventListener('keydown', removeErrorSectionOnKeydown);
 
   body.appendChild(errorMessage);
 };
@@ -252,4 +242,4 @@ const setUserPicterFrom = (onSuccess) => {
 
 init();
 
-export {pristine, closeUploadPicture, setUserPicterFrom};
+export { closeUploadPicture, setUserPicterFrom};
